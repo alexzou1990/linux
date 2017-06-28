@@ -1,0 +1,79 @@
+
+###文件属性解析
+[root@Host syzhao]# ls -l
+total 4848
+-rwxrw-r-- 1 syzhao eng     194 Jun 15  2012 check_crc.v
+
+【-rwxrw-r--】代表文件类型和权限
+【1】表示i-node连接数 
+【syzhao】表示所有者 
+【eng】表示所属用户组 
+【194】表示大小
+【 Jun 15 2012】表示文件创建日期 
+【check_crc.v】表示文件名
+
+下面主要就【-rwxrw-r--】 来说一下，这里的-rwxrw-r--其实是分成四个部分的，
+第一个【-】是一部分代表文件类型，【-】代表是一般文件，【d】代表是目录，【l】代表链接文件。
+第二组【rwx】代表文件所有者权限，这三个这3个字母从左到右分别表示该身份对文件权限【r】代表是否可读【w】代表是否可写【x】代表是否可执行。
+      出现rwx相应的字母就表示有相应的权限，出现【-】则表示该用户对该文件相应操作的权限。
+拿第三组和第四组来说，
+第三组是【rw-】表示该文件所属用户组eng的成员对该文件有【r】读取、【w】写的权限，没有【x】执行的权限。
+
+我们来看看eng组下面都有哪些人。
+[root@Host /etc]# cat group
+eng:x:501:zhou,syzhao,sky,richard
+说明了zhou、syzhao、sky、richard这几个人对文件check_crc.v有读和写的权限，没有执行的权限。
+第四组代表Others对该文件的权限，权限根据字母可以看出，是可读不可写，不可执行，
+那么Others是哪些人呢？Others是除了root（root拥有最高权限）、文件所有者、文件所属用户组以外的所有用户。
+
+
+####文件归属解析
+
+chown [-R] dir/file命令可以改变文件的所有者，加上-R则连递归目录下的所有文件和目录
+[root@Host /]# ll |  grep saku
+drwxr-xr-x.   2 root root  4096 Mar 30 12:46 saku
+[root@Host /]# chown hao /saku
+[root@Host /]# ll |  grep saku
+drwxr-xr-x.   2 hao  root  4096 Mar 30 12:46 saku
+
+下面我们来修改所属组，这次我们修改文件的所属组，加上 [-R] 参数
+
+[root@Host /]# ll /saku/ 
+total 4
+-rw-r--r--. 1 root hao    0 Mar 30 12:55 01.txt
+-rw-r--r--. 1 root hao    0 Mar 30 12:55 02.vim
+drwxr-xr-x. 2 root hao 4096 Mar 30 12:55 soci
+[root@Host /]# chgrp -R sw_eng /saku/  #修改saku及该目录内所有文件和目录的所属用户组为sw_eng
+[root@Host /]# ll /saku/
+total 4
+-rw-r--r--. 1 root sw_eng    0 Mar 30 12:55 01.txt 
+-rw-r--r--. 1 root sw_eng    0 Mar 30 12:55 02.vim 
+drwxr-xr-x. 2 root sw_eng 4096 Mar 30 12:55 soci
+
+
+###修改文件权限
+rwx每种权限都会有个数字，4代表r，2代表w，1代表x
+
+chmod 764 di.zip 
+
+chmod	u  +(添加)  r  dir/file
+      g  -(去除)  w 
+      o  =(设置)  x
+      a	
+ 
+[root@Host hao]# chmod u=r,g=---,o= di.zip 
+[root@Host hao]# ll | grep di
+-r--------.  1 hao  sw_eng   445 Feb 13 16:02 di.zip
+
+
+[root@Host hao]# chmod u+wx,g+rw,o+r di.zip  
+[root@Host hao]# ll | grep di
+-rwxrw-r--.  1 hao  sw_eng   445 Feb 13 16:02 di.zip
+
+
+[root@Host hao]# chmod u=r,g-rw,o=--- di.zip 
+[root@Host hao]# ll | grep di
+-r--------.  1 hao  sw_eng   445 Feb 13 16:02 di.zip
+
+
+	
